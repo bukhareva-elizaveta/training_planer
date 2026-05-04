@@ -400,7 +400,7 @@ class TrainingPlanner:
             self.status_var.set("Ошибка сохранения")
 
 # Главный блок запуска
-if name == "main":
+if name == "main_":
     root = tk.Tk()
     app = TrainingPlanner(root)
     root.mainloop()
