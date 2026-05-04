@@ -1,0 +1,37 @@
+def update_table(self, data=None):
+        """Обновить таблицу"""
+        # Очищаем таблицу
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        if data is None:
+            data = self.trainings
+        
+        # Сортируем по дате
+        data_sorted = sorted(data, key=lambda x: x["date"])
+        
+        for training in data_sorted:
+            self.tree.insert("", "end", values=(
+                training["date"],
+                training["type"],
+                training["duration"]
+            ))
+    
+    def load_data(self):
+        """Загрузить данные из JSON"""
+        if os.path.exists(DATA_FILE):
+            try:
+                with open(DATA_FILE, "r", encoding="utf-8") as f:
+                    self.trainings = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                self.trainings = []
+    
+    def save_data(self):
+        """Сохранить данные в JSON"""
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(self.trainings, f, ensure_ascii=False, indent=2)
+
+if name == "main":
+    root = tk.Tk()
+    app = TrainingPlanner(root)
+    root.mainloop()
