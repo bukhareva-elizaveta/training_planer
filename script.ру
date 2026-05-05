@@ -8,16 +8,11 @@ from datetime import datetime
 DATA_FILE = "trainings.json"
 
 class TrainingPlanner:
-    def init(self, root):
+    def __init__(self, root):
         """Инициализация главного окна и всех компонентов"""
         self.root = root
         self.root.title("Training Planner - План тренировок")
         self.root.geometry("800x600")
-        
-        # Инициализация данных
-        self.trainings = []
-        self.filtered_trainings = []
-        self.load_data()
         
         # Создание интерфейса
         self.create_input_frame()
@@ -25,6 +20,11 @@ class TrainingPlanner:
         self.create_table_frame()
         self.create_buttons_frame()
         self.create_status_bar()
+
+        # Инициализация данных
+        self.trainings = []
+        self.filtered_trainings = []
+        self.load_data()
         
         # Обновление таблицы
         self.update_table()
@@ -78,7 +78,8 @@ class TrainingPlanner:
         self.date_filter.grid(row=0, column=3, padx=5, pady=5)
         
         # Кнопки фильтрации
-        self.filter_btn = ttk.Button(filter_frame, text="Применить фильтры", command=self.apply_filters)self.filter_btn.grid(row=0, column=4, padx=10, pady=5)
+        self.filter_btn = ttk.Button(filter_frame, text="Применить фильтры", command=self.apply_filters)
+        self.filter_btn.grid(row=0, column=4, padx=10, pady=5)
         
         self.reset_btn = ttk.Button(filter_frame, text="Сбросить фильтры", command=self.reset_filters)
         self.reset_btn.grid(row=0, column=5, padx=5, pady=5)
@@ -145,10 +146,10 @@ class TrainingPlanner:
     
     def create_status_bar(self):
         """Создание статусной строки"""
-        self.status_var = tk.StringVar()
-        self.status_var.set("Готов к работе")
-        self.status_bar = ttk.Label(self.root, textvariable=self.status_var, relief="sunken", anchor="w", font=("Arial", 9))
-        self.status_bar.pack(fill="x", padx=10, pady=5)
+        self.status_bar = tk.StringVar()
+        self.status_bar.set("Готов к работе")
+        self.status_var = ttk.Label(self.root, textvariable=self.status_bar, relief="sunken", anchor="w", font=("Arial", 9))
+        self.status_var.pack(fill="x", padx=10, pady=5)
     
     def validate_date(self, date_string):
         """Проверка формата даты"""
@@ -161,7 +162,8 @@ class TrainingPlanner:
     def validate_duration(self, duration_string):
         """Проверка корректности длительности"""
         try:
-            duration = float(duration_string)if duration > 0 and duration <= 1440:  # Максимум 24 часа
+            duration = float(duration_string)
+            if duration > 0 and duration <= 1440:  # Максимум 24 часа
                 return True, duration
             else:
                 return False, None
@@ -177,26 +179,26 @@ class TrainingPlanner:
         # Проверка заполнения всех полей
         if not date or not training_type or not duration_str:
             messagebox.showerror("Ошибка", "Пожалуйста, заполните все поля")
-            self.status_var.set("Ошибка: не все поля заполнены")
+            self.status_bar.set("Ошибка: не все поля заполнены")
             return
         
         # Проверка выбора типа тренировки
         if training_type == "Выберите тип":
             messagebox.showerror("Ошибка", "Пожалуйста, выберите тип тренировки")
-            self.status_var.set("Ошибка: тип тренировки не выбран")
+            self.status_bar.set("Ошибка: тип тренировки не выбран")
             return
         
         # Валидация даты
         if not self.validate_date(date):
             messagebox.showerror("Ошибка", "Неверный формат даты!\nИспользуйте формат: ГГГГ-ММ-ДД\nПример: 2024-12-25")
-            self.status_var.set("Ошибка: неверный формат даты")
+            self.status_bar.set("Ошибка: неверный формат даты")
             return
         
         # Валидация длительности
         is_valid, duration = self.validate_duration(duration_str)
         if not is_valid:
             messagebox.showerror("Ошибка", "Длительность должна быть положительным числом (1-1440 минут)")
-            self.status_var.set("Ошибка: неверная длительность")
+            self.status_bar.set("Ошибка: неверная длительность")
             return
         
         # Добавление тренировки
@@ -214,7 +216,7 @@ class TrainingPlanner:
         self.duration_entry.delete(0, tk.END)
         self.type_entry.set("Выберите тип")
         
-        self.status_var.set(f"✓ Тренировка добавлена: {training_type}, {duration} мин, {date}")
+        self.status_bar.set(f"✓ Тренировка добавлена: {training_type}, {duration} мин, {date}")
         
         # Визуальная индикация
         self.add_btn.config(state="disabled")
@@ -225,7 +227,7 @@ class TrainingPlanner:
         selected = self.tree.selection()
         if not selected:
             messagebox.showwarning("Предупреждение", "Выберите тренировку для удаления")
-            self.status_var.set("Предупреждение: тренировка не выбрана")
+            self.status_bar.set("Предупреждение: тренировка не выбрана")
             return
         
         # Подтверждение удаления
@@ -244,7 +246,7 @@ class TrainingPlanner:
                 deleted = self.trainings.pop(i)
                 self.save_data()
                 self.apply_filters()
-                self.status_var.set(f"✓ Тренировка удалена: {deleted['type']}, {deleted['date']}")
+                self.status_bar.set(f"✓ Тренировка удалена: {deleted['type']}, {deleted['date']}")
                 break
     
     def apply_filters(self):
@@ -271,14 +273,14 @@ class TrainingPlanner:
         total_count = len(self.trainings)
         filtered_count = len(filtered)
         self.count_label.config(text=f"Показано: {filtered_count} из {total_count}")
-        self.status_var.set(f"Фильтрация применена: {filtered_count} записей")
+        self.status_bar.set(f"Фильтрация применена: {filtered_count} записей")
     
     def reset_filters(self):
         """Сброс всех фильтров"""
         self.type_filter.set("Все")
         self.date_filter.delete(0, tk.END)
         self.apply_filters()
-        self.status_var.set("Фильтры сброшены")
+        self.status_bar.set("Фильтры сброшены")
     
     def sort_by_column(self, column):
         """Сортировка таблицы по колонке"""
@@ -294,7 +296,7 @@ class TrainingPlanner:
             sorted_data = data
         
         self.update_table(sorted_data)
-        self.status_var.set(f"Сортировка по колонке: {column}")
+        self.status_bar.set(f"Сортировка по колонке: {column}")
     
     def update_table(self, data=None):
         """Обновление таблицы данными"""
@@ -330,11 +332,11 @@ class TrainingPlanner:
             try:
                 with open(filename, "w", encoding="utf-8") as f:
                     json.dump(self.trainings, f, ensure_ascii=False, indent=2)
-                self.status_var.set(f"✓ Данные экспортированы в {filename}")
+                self.status_bar.set(f"✓ Данные экспортированы в {filename}")
                 messagebox.showinfo("Успех", f"Данные успешно экспортированы в файл:\n{filename}")
             except Exception as e:
                 messagebox.showerror("Ошибка", f"Не удалось экспортировать данные: {str(e)}")
-                self.status_var.set("Ошибка экспорта")
+                self.status_bar.set("Ошибка экспорта")
     
     def import_data(self):
         """Импорт данных из JSON файла"""
@@ -353,19 +355,20 @@ class TrainingPlanner:
                 if isinstance(imported_data, list):
                     valid_count = 0
                     for item in imported_data:
-                        if all(key in item for key in ["date", "type", "duration"]):if self.validate_date(item["date"]) and self.validate_duration(str(item["duration"]))[0]:
+                        if all(key in item for key in ["date", "type", "duration"]):
+                            if self.validate_date(item["date"]) and self.validate_duration(str(item["duration"]))[0]:
                                 self.trainings.append(item)
                                 valid_count += 1
                     
                     self.save_data()
                     self.apply_filters()
-                    self.status_var.set(f"✓ Импортировано {valid_count} из {len(imported_data)} записей")
+                    self.status_bar.set(f"✓ Импортировано {valid_count} из {len(imported_data)} записей")
                     messagebox.showinfo("Успех", f"Импортировано {valid_count} тренировок")
                 else:
                     messagebox.showerror("Ошибка", "Неверный формат файла")
             except Exception as e:
                 messagebox.showerror("Ошибка", f"Не удалось импортировать данные: {str(e)}")
-                self.status_var.set("Ошибка импорта")
+                self.status_bar.set("Ошибка импорта")
     
     def clear_all_data(self):
         """Очистка всех данных"""
@@ -373,7 +376,7 @@ class TrainingPlanner:
             self.trainings = []
             self.save_data()
             self.apply_filters()
-            self.status_var.set("✓ Все данные очищены")
+            self.status_bar.set("✓ Все данные очищены")
             messagebox.showinfo("Успех", "Все тренировки удалены")
     
     def load_data(self):
@@ -382,13 +385,13 @@ class TrainingPlanner:
             try:
                 with open(DATA_FILE, "r", encoding="utf-8") as f:
                     self.trainings = json.load(f)
-                self.status_var.set(f"Загружено {len(self.trainings)} тренировок")
+                self.status_bar.set(f"Загружено {len(self.trainings)} тренировок")
             except (json.JSONDecodeError, IOError) as e:
                 self.trainings = []
-                self.status_var.set(f"Ошибка загрузки данных: {str(e)}")
+                self.status_bar.set(f"Ошибка загрузки данных: {str(e)}")
         else:
             self.trainings = []
-            self.status_var.set("Новый файл данных создан")
+            self.status_bar.set("Новый файл данных создан")
     
     def save_data(self):
         """Сохранение данных в JSON файл"""
@@ -397,10 +400,10 @@ class TrainingPlanner:
                 json.dump(self.trainings, f, ensure_ascii=False, indent=2)
         except IOError as e:
             messagebox.showerror("Ошибка", f"Не удалось сохранить данные: {str(e)}")
-            self.status_var.set("Ошибка сохранения")
+            self.status_bar.set("Ошибка сохранения")
 
 # Главный блок запуска
-if name == "__main__":
+if __name__ == "__main__":
     root = tk.Tk()
     app = TrainingPlanner(root)
     root.mainloop()
